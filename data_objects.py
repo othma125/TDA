@@ -15,21 +15,19 @@ class location:
 
 class track:
     def __init__(self, departure: location, arrival: location):
-        self.traveled_distance = 0
         self.departure_location: location = departure
         self.arrival_location: location = arrival
         self.is_single_track: bool = self.departure_location.is_siding or self.arrival_location.is_siding
 
     def traveled_time(self, train_speed: int) -> int:
-        self.traveled_distance = (self.departure_location.X - self.arrival_location.X) ** 2 + (
+        distance = (self.departure_location.X - self.arrival_location.X) ** 2 + (
                 self.departure_location.Y - self.arrival_location.Y) ** 2
-        self.traveled_distance: float = math.sqrt(self.traveled_distance)
-        # print(self.traveled_distance * 10) # distance in km
-        return int((self.traveled_distance * 10 / train_speed) * 60)
+        distance: float = math.sqrt(distance)
+        # print(distance * 10) # distance in km
+        return int((distance * 10 / train_speed) * 60)
 
     def __str__(self):
         return f'Track(departure = {self.departure_location}, arrival = {self.arrival_location})'
-
 
 
 class train:

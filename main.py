@@ -1,8 +1,6 @@
 from input_data import data
 from model_construction import math_model
 
-# from model_construction import math_model
-
 if __name__ == '__main__':
     print("Now starting..")
     print("\t..Now reading data..")
