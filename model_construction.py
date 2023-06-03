@@ -47,9 +47,8 @@ class math_model:
                     tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
                     time_stamp: int = key[0] + tr.traveled_time(self.inputs.trains_speed)
                     time_stamp += self.inputs.trains_waiting_time_in_stations if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding else 0
-                    if tr.arrival_location != t.arrival_location:
-                        time_stamp = time_stamp if time_stamp % self.inputs.time_step == 0 else self.inputs.time_step + self.inputs.time_step * (
-                                time_stamp // self.inputs.time_step)
+                    if tr.arrival_location != t.arrival_location and time_stamp % self.inputs.time_step > 0:
+                        time_stamp = self.inputs.time_step + self.inputs.time_step * (time_stamp // self.inputs.time_step)
                     for next_arc_key, y in self.waiting_arc_variable.items():
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
                             sum1 += y
