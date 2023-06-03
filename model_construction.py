@@ -13,6 +13,7 @@ class math_model:
         arrival_time = max(t.arrival_time for t in self.inputs.trains)
         self.travel_arc_variable: dict = {}
         self.waiting_arc_variable: dict = {}
+        self.arrival_arc_variable: dict = {}
         obj = 0
         for t in self.inputs.trains:
             for time in range(departure_time, departure_time + 2 * (arrival_time - departure_time) + self.inputs.time_step, self.inputs.time_step):
@@ -23,7 +24,8 @@ class math_model:
                     if loc == t.arrival_location or loc == t.departure_location:
                         continue
                     w_arc: waiting_arc = waiting_arc(t, time, loc)
-                    self.waiting_arc_variable[w_arc.get_unique_key()] = w_arc.get_binary_variable()
+                    self.waiting_arc_variable[w_arc.get_unique_key()] = w_arc.get_binary_variable_for_waiting()
+                    self.arrival_arc_variable[w_arc.get_unique_key()] = w_arc.get_binary_variable_for_arrival()
             # objective function
             for key, x in self.travel_arc_variable.items():
                 if key[3] == t.index and key[2] == t.arrival_location.index:
@@ -48,6 +50,10 @@ class math_model:
                     time_stamp: int = key[0] + tr.traveled_time(self.inputs.trains_speed)
                     time_stamp += self.inputs.trains_waiting_time_in_stations if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding else 0
                     if tr.arrival_location != t.arrival_location and time_stamp % self.inputs.time_step > 0:
+                        for next_arc_key, z in self.arrival_arc_variable.items():
+                            if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and self.inputs.time_step * (time_stamp // self.inputs.time_step) == next_arc_key[0]:
+                                self.model += x == z
+                                break
                         time_stamp = self.inputs.time_step + self.inputs.time_step * (time_stamp // self.inputs.time_step)
                     for next_arc_key, y in self.waiting_arc_variable.items():
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
@@ -68,6 +74,10 @@ class math_model:
             constraint_value = 0
             c = False
             for key2, y in self.waiting_arc_variable.items():
+                if key1[1] == key2[1] and key1[0] == key2[0]:
+                    constraint_value += y
+                    c = True
+            for key2, y in self.arrival_arc_variable.items():
                 if key1[1] == key2[1] and key1[0] == key2[0]:
                     constraint_value += y
                     c = True
@@ -137,8 +147,14 @@ class waiting_arc:
     def get_unique_key(self):
         return self.time_stamp, self.waiting_station.index, self.train.index
 
-    def get_binary_variable(self):
+    def get_binary_variable_for_waiting(self):
         return p.LpVariable("w".join((str(self.time_stamp), str(self.waiting_station.index), str(self.train.index))),
+                            lowBound=0,
+                            upBound=1,
+                            cat=p.LpBinary)
+
+    def get_binary_variable_for_arrival(self):
+        return p.LpVariable("a".join((str(self.time_stamp), str(self.waiting_station.index), str(self.train.index))),
                             lowBound=0,
                             upBound=1,
                             cat=p.LpBinary)
