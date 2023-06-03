@@ -10,11 +10,12 @@ class math_model:
         departure_time = min(t.departure_time for t in self.inputs.trains)
         departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step + self.inputs.time_step * (
                 departure_time // self.inputs.time_step)
-        obj = 0
+        arrival_time = max(t.arrival_time for t in self.inputs.trains)
         self.travel_arc_variable: dict = {}
         self.waiting_arc_variable: dict = {}
+        obj = 0
         for t in self.inputs.trains:
-            for time in range(departure_time, 1445, self.inputs.time_step):  # all trips supposed to stop at midnight
+            for time in range(departure_time, departure_time + 2 * (arrival_time - departure_time) + self.inputs.time_step, self.inputs.time_step):
                 for tr in t.tracks:
                     tr_arc: travel_arc = travel_arc(t, time, tr)
                     self.travel_arc_variable[tr_arc.get_unique_key()] = tr_arc.get_binary_variable()
@@ -41,16 +42,17 @@ class math_model:
                                   key[2] == t.arrival_location.index) == 1
             # constraint 4
             for key, x in self.travel_arc_variable.items():
-                if int(key[3]) == t.index and int(key[2]) != t.arrival_location.index:
+                if key[3] == t.index and key[2] != t.arrival_location.index:
                     sum1 = x
                     tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
                     time_stamp: int = key[0] + tr.traveled_time(self.inputs.trains_speed)
-                    if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding:
-                        time_stamp += self.inputs.trains_waiting_time_in_stations
+                    time_stamp += self.inputs.trains_waiting_time_in_stations if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding else 0
+                    if tr.arrival_location != t.arrival_location:
+                        time_stamp = time_stamp if time_stamp % self.inputs.time_step == 0 else self.inputs.time_step + self.inputs.time_step * (
+                                time_stamp // self.inputs.time_step)
                     for next_arc_key, y in self.waiting_arc_variable.items():
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
                             sum1 += y
-                            break
                     sum2 = 0
                     for next_arc_key, y in self.travel_arc_variable.items():
                         if next_arc_key[3] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
@@ -59,7 +61,6 @@ class math_model:
                     for next_arc_key, z in self.waiting_arc_variable.items():
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
                             sum2 += z
-                            break
                     self.model += sum1 == sum2
         # objective function
         self.model += obj
@@ -105,7 +106,8 @@ class math_model:
             tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
             if p.value(x) == 1:
                 print(f'Train with index = {t.index + 1} travel in track = {tr}')
-                print(f'Departure time = {key[0]}, arrival time = {key[0] + tr.traveled_time(self.inputs.trains_speed)}')
+                print(
+                    f'Departure time = {key[0]}, arrival time = {key[0] + tr.traveled_time(self.inputs.trains_speed)}')
                 if tr.arrival_location == t.arrival_location:
                     print(f'Scheduled arrival time for train {t.index + 1} is {t.arrival_time}')
 

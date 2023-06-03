@@ -10,7 +10,7 @@ class location:
         self.is_siding: bool = line[4] == 'siding'
 
     def __str__(self):
-        return f'Location with index = {self.index}'
+        return f'Location with index = {self.index + 1}'
 
 
 class track:
