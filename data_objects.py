@@ -31,11 +31,15 @@ class track:
 
 
 class train:
-    def __init__(self, i: int, departure: int, arrival: int, tracks: list[track], path: list[location]):
+    def __init__(self, i: int, departure: int, arrival: int, category: int, tracks: list[track], path: list[location]):
         self.index = i
         self.departure_time: int = departure
         self.arrival_time: int = arrival
+        self.category: int = category
         self.tracks: list[track] = tracks
         self.path: list[location] = path
         self.departure_location: location = self.path[0]
         self.arrival_location: location = self.path[len(self.path) - 1]
+
+    def __str__(self):
+        return f'Index = {self.index + 1} and Category = {self.category}'

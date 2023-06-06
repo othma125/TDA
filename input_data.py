@@ -22,7 +22,8 @@ class data:
                 line = file.readline().split()
                 n: int = len(line)
                 departure: int = int(line[1])
-                path: list[location] = [self.locations[int(line[i]) - 1] for i in range(2, n)]
+                category: int = int(line[2])
+                path: list[location] = [self.locations[int(line[i]) - 1] for i in range(3, n)]
                 tracks = []
                 arrival: int = departure
                 n: int = len(path)
@@ -31,10 +32,7 @@ class data:
                     arrival += tr.traveled_time(self.trains_speed)
                     if not path[i].is_siding:
                         arrival += self.trains_waiting_time_in_stations if i > 0 else 0
-                    # if i + 1 < n - 1:
-                    #     arrival = arrival if arrival % self.time_step == 0 else self.time_step + self.time_step * (
-                    #             arrival // self.time_step)
                     tracks.append(tr)
-                self.trains.append(train(t, departure, arrival, tracks, path))
+                self.trains.append(train(t, departure, arrival, category, tracks, path))
 
 
