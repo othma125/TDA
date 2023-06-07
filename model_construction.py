@@ -90,21 +90,10 @@ class math_model:
         # constraint 6
         for key1, x in self.travel_arc_variable.items():
             tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
-            if tr.is_single_track:
-                constraint_value = x
-                c = False
-                for key2, y in self.travel_arc_variable.items():
-                    if key1[1] == key2[2] and key1[2] == key2[1] and key1[0] < key2[0] and key2[0] - key1[0] <= tr.traveled_time():
-                        constraint_value += y
-                        c = True
-                if c:
-                    self.model += constraint_value <= 1
-        # constraint 7
-        for key1, x in self.travel_arc_variable.items():
             constraint_value = x
             c = False
             for key2, y in self.travel_arc_variable.items():
-                if key1[1] == key2[1] and key1[2] == key2[2] and key1[0] < key2[0] and key2[0] - key1[0] <= self.inputs.safety_time:
+                if ((key1[1] == key2[1] and key1[2] == key2[2]) or (key1[1] == key2[2] and key1[2] == key2[1])) and key1[0] < key2[0] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
                     constraint_value += y
                     c = True
             if c:
