@@ -17,6 +17,7 @@ class track:
     def __init__(self, departure: location, arrival: location):
         self.departure_location: location = departure
         self.arrival_location: location = arrival
+        self.is_single_track: bool = self.departure_location.is_siding or self.arrival_location.is_siding
 
     def traveled_time(self, train_speed: int) -> int:
         distance = (self.departure_location.X - self.arrival_location.X) ** 2 + (

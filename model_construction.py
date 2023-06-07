@@ -71,9 +71,8 @@ class math_model:
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
                             sum2 += z
                     self.model += sum1 == sum2
-        # objective function
         self.model += obj
-        # # constraint 5
+        # waiting sites capacity constraint
         for key1, x in self.waiting_arc_variable.items():
             constraint_value = 0
             c = False
@@ -87,13 +86,18 @@ class math_model:
                     c = True
             if c:
                 self.model += constraint_value <= self.inputs.locations[key1[1]].capacity
-        # constraint 6
+        # conflicts constraint
         for key1, x in self.travel_arc_variable.items():
-            tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
             constraint_value = x
             c = False
             for key2, y in self.travel_arc_variable.items():
-                if key1[0] < key2[0] and ((key1[1] == key2[1] and key1[2] == key2[2]) or (key1[1] == key2[2] and key1[2] == key2[1])) and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
+                if key1[0] >= key2[0]:
+                    continue
+                tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
+                if key1[1] == key2[1] and key1[2] == key2[2] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
+                    constraint_value += y
+                    c = True
+                if tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
                     constraint_value += y
                     c = True
             if c:
