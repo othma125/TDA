@@ -10,7 +10,10 @@
 9 30.03 35.07 3 station
 10 35.05 31.05 3 station
 11 32.00 31.09 1 siding
-3 200 3 //trains count, train average speed (km/h), waiting time in station (sidings are not included), safety time for two trains that takes same track in same direction
+6 200 3 //trains count, train average speed (km/h), waiting time in station (sidings are not included), safety time for two trains that takes same track in same direction
 1 450 1 9 6 5 3 8
 2 540 2 7 1 5 3 10
 3 720 1 7 4 6 5 9 11 10
+4 455 1 9 6 5 3 8
+5 545 2 7 1 5 3 10
+6 725 1 7 4 6 5 9 11 10

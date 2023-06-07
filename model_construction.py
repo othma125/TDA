@@ -77,10 +77,14 @@ class math_model:
             constraint_value = 0
             c = False
             for key2, y in self.waiting_arc_variable.items():
+                if key1[2] == key2[2]:
+                    continue
                 if key1[1] == key2[1] and key1[0] == key2[0]:
                     constraint_value += y
                     c = True
             for key2, y in self.arrival_arc_variable.items():
+                if key1[2] == key2[2]:
+                    continue
                 if key1[1] == key2[1] and key1[0] == key2[0]:
                     constraint_value += y
                     c = True
@@ -91,7 +95,7 @@ class math_model:
             constraint_value = x
             c = False
             for key2, y in self.travel_arc_variable.items():
-                if key1[0] >= key2[0]:
+                if key1[0] >= key2[0] or key1[3] == key2[3]:
                     continue
                 tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
                 if key1[1] == key2[1] and key1[2] == key2[2] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
