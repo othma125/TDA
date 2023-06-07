@@ -93,7 +93,7 @@ class math_model:
             constraint_value = x
             c = False
             for key2, y in self.travel_arc_variable.items():
-                if ((key1[1] == key2[1] and key1[2] == key2[2]) or (key1[1] == key2[2] and key1[2] == key2[1])) and key1[0] < key2[0] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
+                if key1[0] < key2[0] and ((key1[1] == key2[1] and key1[2] == key2[2]) or (key1[1] == key2[2] and key1[2] == key2[1])) and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
                     constraint_value += y
                     c = True
             if c:
