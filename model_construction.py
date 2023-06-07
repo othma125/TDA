@@ -116,7 +116,7 @@ class math_model:
         print(f'Objective function value = {p.value(self.model.objective)}')
         delay: int = 0
         for key, x in self.travel_arc_variable.items():
-            if p.value(x) == 1 and key[2] == t.arrival_location.index:
+            if p.value(x) == 1 and self.inputs.trains[key[3]].arrival_location.index == key[2]:
                 t: train = self.inputs.trains[key[3]]
                 tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
                 time_stamp: int = key[0] + tr.traveled_time(self.inputs.trains_speed)
