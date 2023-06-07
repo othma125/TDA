@@ -119,7 +119,8 @@ class math_model:
             if p.value(x) == 1:
                 t: train = self.inputs.trains[key[3]]
                 tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
-                print(f'Train {t} travel in track = {tr}')
+                if tr.departure_location == t.departure_location:
+                    print(f'Train {t} travel in track = {tr}')
                 print(f'Departure time = {key[0]}, arrival time = {key[0] + tr.traveled_time(self.inputs.trains_speed)}')
                 if tr.arrival_location == t.arrival_location:
                     print(f'Scheduled arrival time for train {t.index + 1} is {t.arrival_time}')
