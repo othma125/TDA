@@ -128,9 +128,9 @@ class math_model:
 
 class travel_arc:
     def __init__(self, trn: train, time: int, tr: track):
+        self.train = trn
         self.time_stamp: int = time
         self.traveled_track: track = tr
-        self.train = trn
 
     def get_unique_key(self):
         return self.time_stamp, self.traveled_track.departure_location.index, self.traveled_track.arrival_location.index, self.train.index
@@ -145,9 +145,9 @@ class travel_arc:
 
 class waiting_arc:
     def __init__(self, trn: train, time: int, loc: location):
+        self.train = trn
         self.time_stamp: int = time
         self.waiting_station: location = loc
-        self.train = trn
 
     def get_unique_key(self):
         return self.time_stamp, self.waiting_station.index, self.train.index
