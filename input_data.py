@@ -16,7 +16,6 @@ class data:
             self.trains_count: int = int(line[0])
             self.trains_speed: int = int(line[1])
             self.trains_waiting_time_in_stations: int = int(line[2])
-            self.safety_time: int = int(line[3])
             self.trains: list[train] = []
             for t in range(self.trains_count):
                 line = file.readline().split()
