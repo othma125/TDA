@@ -58,7 +58,7 @@ class math_model:
                                 self.model += x == z
                                 break
                         time_stamp = self.inputs.time_step + self.inputs.time_step * (
-                                    time_stamp // self.inputs.time_step)
+                                time_stamp // self.inputs.time_step)
                     for next_arc_key, y in self.waiting_arc_variable.items():
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
                             sum1 += y
@@ -98,10 +98,12 @@ class math_model:
                 if key1[0] >= key2[0] or key1[3] == key2[3]:
                     continue
                 tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
-                if key1[1] == key2[1] and key1[2] == key2[2] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
+                if key1[1] == key2[1] and key1[2] == key2[2] and key2[0] - key1[0] <= tr.traveled_time(
+                        self.inputs.trains_speed):
                     constraint_value += y
                     c = True
-                if tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] and key2[0] - key1[0] <= tr.traveled_time(self.inputs.trains_speed):
+                if tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] and key2[0] - key1[
+                    0] <= tr.traveled_time(self.inputs.trains_speed):
                     constraint_value += y
                     c = True
             if c:
@@ -125,9 +127,18 @@ class math_model:
                 tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
                 if tr.departure_location == t.departure_location:
                     print(f'Train {t} travel from {t.departure_location} to {t.arrival_location}')
-                print(f'Departure time = {key[0]}, arrival time = {key[0] + tr.traveled_time(self.inputs.trains_speed)}')
+                print(
+                    f'Departure time = {self.toTimeFormat(key[0])}, arrival time = {self.toTimeFormat(key[0] + tr.traveled_time(self.inputs.trains_speed))}')
                 if tr.arrival_location == t.arrival_location:
-                    print(f'Scheduled arrival time for train {t.index + 1} is {t.arrival_time}')
+                    print(f'Scheduled arrival time for train {t.index + 1} is {self.toTimeFormat(t.arrival_time)}')
+
+    def toTimeFormat(self, time: int) -> str:
+        hour = time // 60
+        s = str(hour)
+        s = ("0" if hour < 10 else "") + s + " : "
+        minutes = time % 60
+        s += ("0" if minutes < 10 else "") + str(minutes)
+        return s
 
 
 class travel_arc:
