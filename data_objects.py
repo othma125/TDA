@@ -1,6 +1,7 @@
 import math
 from haversine import haversine
 
+
 class location:
     def __init__(self, line: list[str]):
         self.index: int = int(line[0]) - 1
