@@ -1,5 +1,5 @@
 import math
-
+from haversine import haversine
 
 class location:
     def __init__(self, line: list[str]):
@@ -23,8 +23,9 @@ class track:
         distance = (self.departure_location.X - self.arrival_location.X) ** 2 + (
                 self.departure_location.Y - self.arrival_location.Y) ** 2
         distance: float = math.sqrt(distance)
-        # print(distance * 10) # distance in km
-        return int((distance * 10 / train_speed) * 60)
+        departure = (self.departure_location.X, self.departure_location.Y)
+        arrival = (self.arrival_location.X, self.arrival_location.Y)
+        return int((haversine(departure, arrival) / train_speed) * 60)
 
     def __str__(self):
         return f'Track(departure = {self.departure_location}, arrival = {self.arrival_location})'
