@@ -128,17 +128,18 @@ class math_model:
                 if tr.departure_location == t.departure_location:
                     print(f'Train {t} travel from {t.departure_location} to {t.arrival_location}')
                 print(
-                    f'Departure time = {self.toTimeFormat(key[0])}, arrival time = {self.toTimeFormat(key[0] + tr.traveled_time(self.inputs.trains_speed))}')
+                    f'Departure time = {toTimeFormat(key[0])}, arrival time = {toTimeFormat(key[0] + tr.traveled_time(self.inputs.trains_speed))}')
                 if tr.arrival_location == t.arrival_location:
-                    print(f'Scheduled arrival time for train {t.index + 1} is {self.toTimeFormat(t.arrival_time)}')
+                    print(f'Scheduled arrival time for train {t.index + 1} is {toTimeFormat(t.arrival_time)}')
 
-    def toTimeFormat(self, time: int) -> str:
-        hour = time // 60
-        s = str(hour)
-        s = ("0" if hour < 10 else "") + s + " : "
-        minutes = time % 60
-        s += ("0" if minutes < 10 else "") + str(minutes)
-        return s
+
+def toTimeFormat(time: int) -> str:
+    hour = time // 60
+    s = str(hour)
+    s = ("0" if hour < 10 else "") + s + ":"
+    minutes = time % 60
+    s += ("0" if minutes < 10 else "") + str(minutes)
+    return s
 
 
 class travel_arc:

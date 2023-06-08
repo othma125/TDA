@@ -20,7 +20,10 @@ class data:
             for t in range(self.trains_count):
                 line = file.readline().split()
                 n: int = len(line)
-                departure: int = int(line[1])
+                departure: int = 0
+                time = line[1].split(':')
+                departure += int(time[0]) * 60
+                departure += int(time[1])
                 category: int = int(line[2])
                 path: list[location] = [self.locations[int(line[i]) - 1] for i in range(3, n)]
                 tracks = []
