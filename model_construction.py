@@ -39,7 +39,7 @@ class math_model:
                                   key[3] == t.index and key[1] == t.departure_location.index and
                                   key[0] >= t.departure_time) == 1
             self.model += p.lpSum(x for key, x in self.travel_arc_variable.items() if
-                                  key[3] == t.index and int(key[1]) == t.departure_location.index and
+                                  key[3] == t.index and key[1] == t.departure_location.index and
                                   key[0] < t.departure_time) == 0
             # constraint 3
             self.model += p.lpSum(x for key, x in self.travel_arc_variable.items() if key[3] == t.index and
@@ -50,26 +50,34 @@ class math_model:
                     sum1 = x
                     tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
                     time_stamp: int = key[0] + tr.traveled_time(self.inputs.trains_speed)
-                    time_stamp += self.inputs.trains_waiting_time_in_stations if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding else 0
                     if tr.arrival_location != t.arrival_location and time_stamp % self.inputs.time_step > 0:
                         for next_arc_key, z in self.arrival_arc_variable.items():
                             if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and self.inputs.time_step * (
                                     time_stamp // self.inputs.time_step) == next_arc_key[0]:
                                 self.model += x == z
                                 break
-                        time_stamp = self.inputs.time_step + self.inputs.time_step * (
-                                time_stamp // self.inputs.time_step)
+                    if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding:
+                        time_stamp += self.inputs.trains_waiting_time_in_stations
+                        if tr.arrival_location != t.arrival_location and time_stamp % self.inputs.time_step > 0:
+                            for next_arc_key, z in self.arrival_arc_variable.items():
+                                if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and self.inputs.time_step * (
+                                        time_stamp // self.inputs.time_step) == next_arc_key[0]:
+                                    self.model += x == z
+                                    break
+                    time_stamp = self.inputs.time_step + self.inputs.time_step * (time_stamp // self.inputs.time_step)
                     for next_arc_key, y in self.waiting_arc_variable.items():
-                        if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
+                        if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp == next_arc_key[0]:
                             sum1 += y
+                            break
                     sum2 = 0
                     for next_arc_key, y in self.travel_arc_variable.items():
-                        if next_arc_key[3] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
+                        if next_arc_key[3] == t.index and next_arc_key[1] == key[2] and time_stamp == next_arc_key[0]:
                             sum2 += y
                             break
                     for next_arc_key, z in self.waiting_arc_variable.items():
-                        if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp <= next_arc_key[0]:
+                        if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp == next_arc_key[0]:
                             sum2 += z
+                            break
                     self.model += sum1 == sum2
         self.model += obj
         # waiting sites capacity constraint
@@ -92,18 +100,19 @@ class math_model:
                 self.model += constraint_value <= self.inputs.locations[key1[1]].capacity
         # conflicts constraint
         for key1, x in self.travel_arc_variable.items():
+            tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
             constraint_value = x
             c = False
             for key2, y in self.travel_arc_variable.items():
-                if key1[0] >= key2[0] or key1[3] == key2[3]:
+                if key1[0] <= key2[0] or key1[3] == key2[3]:
                     continue
-                tr: track = track(self.inputs.locations[key1[1]], self.inputs.locations[key1[2]])
-                if key1[1] == key2[1] and key1[2] == key2[2] and key2[0] - key1[0] <= tr.traveled_time(
-                        self.inputs.trains_speed):
+                travel_time = tr.traveled_time(self.inputs.trains_speed)
+                if key1[1] == key2[1] and key1[2] == key2[2] \
+                        and key1[0] - key2[0] <= travel_time:
                     constraint_value += y
                     c = True
-                if tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] and key2[0] - key1[
-                    0] <= tr.traveled_time(self.inputs.trains_speed):
+                elif tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] \
+                        and key1[0] - key2[0] <= travel_time:
                     constraint_value += y
                     c = True
             if c:
