@@ -50,7 +50,7 @@ class math_model:
                     sum1 = x
                     tr: track = track(self.inputs.locations[key[1]], self.inputs.locations[key[2]])
                     time_stamp: int = key[0] + tr.traveled_time(self.inputs.trains_speed)
-                    if tr.arrival_location != t.arrival_location and time_stamp % self.inputs.time_step > 0:
+                    if tr.arrival_location != t.arrival_location:
                         for next_arc_key, z in self.arrival_arc_variable.items():
                             if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and self.inputs.time_step * (
                                     time_stamp // self.inputs.time_step) == next_arc_key[0]:
@@ -58,13 +58,13 @@ class math_model:
                                 break
                     if tr.arrival_location != t.arrival_location and not tr.arrival_location.is_siding:
                         time_stamp += self.inputs.trains_waiting_time_in_stations
-                        if tr.arrival_location != t.arrival_location and time_stamp % self.inputs.time_step > 0:
+                        if tr.arrival_location != t.arrival_location:
                             for next_arc_key, z in self.arrival_arc_variable.items():
                                 if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and self.inputs.time_step * (
                                         time_stamp // self.inputs.time_step) == next_arc_key[0]:
                                     self.model += x == z
                                     break
-                    time_stamp = self.inputs.time_step + self.inputs.time_step * (time_stamp // self.inputs.time_step)
+                    time_stamp = self.inputs.time_step * (time_stamp // self.inputs.time_step) + self.inputs.time_step if time_stamp % self.inputs.time_step > 0 else 0
                     for next_arc_key, y in self.waiting_arc_variable.items():
                         if next_arc_key[2] == t.index and next_arc_key[1] == key[2] and time_stamp == next_arc_key[0]:
                             sum1 += y
@@ -107,12 +107,11 @@ class math_model:
                 if key1[0] <= key2[0] or key1[3] == key2[3]:
                     continue
                 travel_time = tr.traveled_time(self.inputs.trains_speed)
-                if key1[1] == key2[1] and key1[2] == key2[2] \
-                        and key1[0] - key2[0] <= travel_time:
+                travel_time = self.inputs.time_step * (travel_time // self.inputs.time_step) + self.inputs.time_step if travel_time % self.inputs.time_step > 0 else 0
+                if key1[1] == key2[1] and key1[2] == key2[2] and key1[0] - key2[0] <= travel_time:
                     constraint_value += y
                     c = True
-                elif tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] \
-                        and key1[0] - key2[0] <= travel_time:
+                elif tr.is_single_track and key1[1] == key2[2] and key1[2] == key2[1] and key1[0] - key2[0] <= travel_time:
                     constraint_value += y
                     c = True
             if c:

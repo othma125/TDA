@@ -21,12 +21,10 @@ class track:
         self.is_single_track: bool = self.departure_location.is_siding or self.arrival_location.is_siding
 
     def traveled_time(self, train_speed: int) -> int:
-        distance = (self.departure_location.X - self.arrival_location.X) ** 2 + (
-                self.departure_location.Y - self.arrival_location.Y) ** 2
-        distance: float = math.sqrt(distance)
         departure = (self.departure_location.X, self.departure_location.Y)
         arrival = (self.arrival_location.X, self.arrival_location.Y)
-        return int((haversine(departure, arrival) / train_speed) * 60)
+        distance: float = haversine(departure, arrival)
+        return int((distance / train_speed) * 60)
 
     def __str__(self):
         return f'Track(departure = {self.departure_location}, arrival = {self.arrival_location})'
