@@ -20,6 +20,9 @@ class track:
         self.arrival_location: location = arrival
         self.is_single_track: bool = self.departure_location.is_siding or self.arrival_location.is_siding
 
+    def get_inverse(self):
+        return track(self.arrival_location, self.departure_location)
+
     def traveled_time(self, train_speed: int) -> int:
         departure = (self.departure_location.X, self.departure_location.Y)
         arrival = (self.arrival_location.X, self.arrival_location.Y)
@@ -37,9 +40,9 @@ class train:
         self.arrival_time: int = arrival
         self.category: int = category
         self.tracks: list[track] = tracks
-        self.path: list[location] = path
-        self.departure_location: location = self.path[0]
-        self.arrival_location: location = self.path[len(self.path) - 1]
+        self.route: list[location] = path
+        self.departure_location: location = self.route[0]
+        self.arrival_location: location = self.route[len(self.route) - 1]
 
     def __str__(self):
         return f'Index = {self.index + 1} and Category = {self.category}'
