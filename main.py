@@ -5,7 +5,7 @@ if __name__ == '__main__':
     print("Now starting..")
     print("\t..Now reading data..")
     try:
-        inputs = data("instance.txt")
+        inputs = data("instance2.txt")
     except:
         print("Reading of the data failed. Try again")
         quit()
