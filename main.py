@@ -9,15 +9,15 @@ if __name__ == '__main__':
     except:
         print("Reading of the data failed. Try again")
         quit()
-    try:
-        print("\t..Now creating model..")
-        model = math_model(inputs)
-    except:
-        print("Something went wrong in creating model. Try again")
-        quit()
-    try:
-        print("\t..Now solving..")
-        model.solve()
-    except:
-        print("Something went wrong in processing. Try again")
-        quit()
+    # try:
+    print("\t..Now creating model..")
+    model = math_model(inputs)
+    # except:
+    #     print("Something went wrong in creating model. Try again")
+    #     quit()
+    # try:
+    #     print("\t..Now solving..")
+    model.solve()
+    # except:
+    #     print("Something went wrong in processing. Try again")
+    #     quit()
