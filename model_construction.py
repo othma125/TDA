@@ -11,12 +11,11 @@ class math_model:
         self.model: p.LpProblem = p.LpProblem("train_dispatching", p.LpMinimize)
         self.travel_arc_variables: dict = {}
         self.waiting_arc_variables: dict = {}
-        # self.arrival_arc_variables: dict = {}
         obj = 0
         for t in self.inputs.trains:
             departure_time = t.departure_time
             departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(departure_time / self.inputs.time_step)
-            max_time_stamp: int = departure_time + 2 * (t.arrival_time - departure_time)
+            max_time_stamp: int = departure_time + (t.arrival_time - departure_time)
             for time in range(departure_time, max_time_stamp, self.inputs.time_step):
                 for tr in t.tracks:
                     tr_arc: travel_arc = travel_arc(t, time, tr)
@@ -26,7 +25,6 @@ class math_model:
                         continue
                     w_arc: waiting_arc = waiting_arc(t, time, loc)
                     self.waiting_arc_variables["w".join(w_arc.get_unique_key())] = w_arc.get_binary_variable_for_waiting()
-                    # self.arrival_arc_variables["a".join(w_arc.get_unique_key())] = w_arc.get_binary_variable_for_arrival()
 
             # objective function
             for time in range(departure_time, max_time_stamp, self.inputs.time_step):
@@ -63,37 +61,23 @@ class math_model:
                         next_tr = tr2
                         break
                 arrival: int = departure + tr.traveled_time(self.inputs.trains_speed)
-                arrival += self.inputs.trains_waiting_time_in_stations if tr.departure_location != t.departure_time and not tr.departure_location.is_siding else 0
-                # arrival = arrival if arrival % self.inputs.time_step == 0 else self.inputs.time_step * ceil(arrival / self.inputs.time_step)
+                arrival += 0 if tr.departure_location == t.departure_time or tr.departure_location.is_siding else self.inputs.trains_waiting_time_in_stations
                 c: bool = arrival % self.inputs.time_step > 0
                 if c:
-                    arrival = self.inputs.time_step * (arrival // self.inputs.time_step)
+                    arrival = self.inputs.time_step * ceil(arrival / self.inputs.time_step)
                 time_stamp: int = arrival
                 for time in range(departure, max_time_stamp, self.inputs.time_step):
                     tr_arc: travel_arc = travel_arc(t, time, tr)
                     uni_key: str = 't'.join(tr_arc.get_unique_key())
                     sum1 = self.travel_arc_variables[uni_key]
-                    # time_stamp: int = time + tr.traveled_time(self.inputs.trains_speed)
-                    # # ar_arc: waiting_arc = waiting_arc(t, self.inputs.time_step * (time_stamp // self.inputs.time_step), tr.arrival_location)
-                    # # uni_key2: str = 'a'.join(ar_arc.get_unique_key())
-                    # # if uni_key2 in self.arrival_arc_variable:
-                    # #     self.model += self.travel_arc_variable[uni_key] == self.arrival_arc_variable[uni_key2]
-                    # if not tr.arrival_location.is_siding:
-                    #     time_stamp += self.inputs.trains_waiting_time_in_stations
-                    # #     ar_arc: waiting_arc = waiting_arc(t, self.inputs.time_step * (time_stamp // self.inputs.time_step), tr.arrival_location)
-                    # #     uni_key2: str = 'a'.join(ar_arc.get_unique_key())
-                    # #     if uni_key2 in self.arrival_arc_variable:
-                    # #         self.model += self.travel_arc_variable[uni_key] == self.arrival_arc_variable[uni_key2]
-                    # if time_stamp % self.inputs.time_step > 0:
-                    #     time_stamp = self.inputs.time_step * ceil(time_stamp / self.inputs.time_step)
-                    w_arc: waiting_arc = waiting_arc(t, time_stamp + (self.inputs.time_step if not c else 0), tr.arrival_location)
-                    uni_key2: str = 'w'.join(w_arc.get_unique_key())
-                    sum1 += self.waiting_arc_variables[uni_key2] if uni_key2 in self.waiting_arc_variables else 0
+                    w_arc: waiting_arc = waiting_arc(t, time_stamp - (self.inputs.time_step if c else 0), tr.arrival_location)
+                    uni_key: str = 'w'.join(w_arc.get_unique_key())
+                    sum1 += self.waiting_arc_variables[uni_key] if uni_key in self.waiting_arc_variables else 0
                     sum2 = 0
-                    w_arc: waiting_arc = waiting_arc(t, time_stamp + self.inputs.time_step, tr.arrival_location)
+                    w_arc: waiting_arc = waiting_arc(t, time_stamp, tr.arrival_location)
                     uni_key: str = 'w'.join(w_arc.get_unique_key())
                     sum2 += self.waiting_arc_variables[uni_key] if uni_key in self.waiting_arc_variables.keys() else 0
-                    tr_arc: travel_arc = travel_arc(t, time_stamp + self.inputs.time_step, next_tr)
+                    tr_arc: travel_arc = travel_arc(t, time_stamp, next_tr)
                     uni_key: str = 't'.join(tr_arc.get_unique_key())
                     sum2 += self.travel_arc_variables[uni_key] if uni_key in self.travel_arc_variables.keys() else 0
                     self.model += sum1 == sum2
@@ -104,36 +88,45 @@ class math_model:
         for key in self.waiting_arc_variables.keys():
             w_arc: waiting_arc = get_waiting_arc(self.inputs, key)
             constraint_value = 0
-            c: bool = False
             for t in self.inputs.trains:
                 if t == w_arc.train:
                     continue
                 w_arc2: waiting_arc = waiting_arc(t, w_arc.time_stamp, w_arc.waiting_station)
                 uni_key: str = 'w'.join(w_arc2.get_unique_key())
                 constraint_value += self.waiting_arc_variables[uni_key] if uni_key in self.waiting_arc_variables.keys() else 0
-                # uni_key: str = 'a'.join(w_arc2.get_unique_key())
-                # constraint_value += self.arrival_arc_variable[uni_key] if uni_key in self.arrival_arc_variable.keys() else 0
             self.model += constraint_value <= w_arc.waiting_station.capacity
 
         # conflicts constraint
         for key in self.travel_arc_variables.keys():
             tr_arc: travel_arc = get_travel_arc(self.inputs, key)
+            uni_key: str = "t".join(tr_arc.get_unique_key())
             travel_time: int = tr_arc.traveled_track.traveled_time(self.inputs.trains_speed)
-            constraint_value = 0
+            arrival: int = tr_arc.time_stamp + travel_time
+            arrival = arrival + self.inputs.time_step if arrival % self.inputs.time_step == 0 else self.inputs.time_step * ceil(arrival / self.inputs.time_step)
             for t in self.inputs.trains:
                 if t == tr_arc.train:
                     continue
-                for time in range(tr_arc.time_stamp, max_time_stamp, self.inputs.time_step):
-                    if time - tr_arc.time_stamp > travel_time:
-                        break
+                for time in range(tr_arc.time_stamp, arrival, self.inputs.time_step):
                     tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track)
-                    uni_key: str = "t".join(tr_arc2.get_unique_key())
-                    constraint_value += self.travel_arc_variables[uni_key] if uni_key in self.travel_arc_variables.keys() else 0
+                    uni_key2: str = "t".join(tr_arc2.get_unique_key())
+                    if uni_key2 in self.travel_arc_variables.keys():
+                        self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
                     if tr_arc.traveled_track.is_single_track:
                         tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track.get_inverse())
-                        uni_key: str = "t".join(tr_arc2.get_unique_key())
-                        constraint_value += self.travel_arc_variables[uni_key] if uni_key in self.travel_arc_variables.keys() else 0
-            self.model += constraint_value <= 1
+                        uni_key2: str = "t".join(tr_arc2.get_unique_key())
+                        if uni_key != uni_key2 and uni_key2 in self.travel_arc_variables.keys():
+                            self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
+                for time in range(t.departure_time * (t.departure_time // self.inputs.time_step), tr_arc.time_stamp, self.inputs.time_step):
+                    if tr_arc.time_stamp - time < arrival - tr_arc.time_stamp:
+                        tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track)
+                        uni_key2: str = "t".join(tr_arc2.get_unique_key())
+                        if uni_key2 in self.travel_arc_variables.keys():
+                            self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
+                        if tr_arc.traveled_track.is_single_track:
+                            tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track.get_inverse())
+                            uni_key2: str = "t".join(tr_arc2.get_unique_key())
+                            if uni_key != uni_key2 and uni_key2 in self.travel_arc_variables.keys():
+                                self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
 
         self.model += obj
 
@@ -202,6 +195,11 @@ class waiting_arc:
                             cat=p.LpBinary)
 
 
+def get_travel_arc(input_data: data, s: str) -> travel_arc:
+    l = s.split('t')
+    return travel_arc(input_data.trains[int(l[3])], int(l[0]), track(input_data.locations[int(l[1])], input_data.locations[int(l[2])]))
+
+
 def get_waiting_arc(input_data: data, s: str) -> waiting_arc:
     l = s.split('w')
     return waiting_arc(input_data.trains[int(l[2])], int(l[0]), input_data.locations[int(l[1])])
@@ -210,11 +208,6 @@ def get_waiting_arc(input_data: data, s: str) -> waiting_arc:
 # def get_arrival_arc(input_data: data, s: str) -> waiting_arc:
 #     l = s.split('a')
 #     return waiting_arc(input_data.trains[int(l[2])], int(l[0]), input_data.locations[int(l[1])])
-
-
-def get_travel_arc(input_data: data, s: str) -> travel_arc:
-    l = s.split('t')
-    return travel_arc(input_data.trains[int(l[3])], int(l[0]), track(input_data.locations[int(l[1])], input_data.locations[int(l[2])]))
 
 
 def toTimeFormat(time: int) -> str:
