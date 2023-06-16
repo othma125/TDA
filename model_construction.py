@@ -117,8 +117,7 @@ class math_model:
                         uni_key2: str = "t".join(tr_arc2.get_unique_key())
                         if uni_key2 in self.travel_arc_variables.keys():
                             self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
-                departure_time = t.departure_time
-                departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(departure_time / self.inputs.time_step)
+                departure_time: int = t.departure_time if t.departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(t.departure_time / self.inputs.time_step)
                 if departure_time >= tr_arc.time_stamp:
                     continue
                 for time in range(departure_time, tr_arc.time_stamp, self.inputs.time_step):
