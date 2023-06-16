@@ -60,7 +60,7 @@ class math_model:
                         next_tr = tr2
                         break
                 arrival: int = departure + tr.traveled_time(self.inputs.trains_speed)
-                arrival += 0 if tr.departure_location == t.departure_time or tr.departure_location.is_siding else self.inputs.trains_waiting_time_in_stations
+                arrival += 0 if tr.departure_location == t.departure_time or tr.arrival_location.is_siding else self.inputs.trains_waiting_time_in_stations
                 # c: bool = arrival % self.inputs.time_step > 0
                 arrival = self.inputs.time_step * ceil(arrival / self.inputs.time_step) if arrival % self.inputs.time_step > 0 else arrival
                 arrival_time_stamp: int = arrival
@@ -87,7 +87,7 @@ class math_model:
         # waiting sites capacity constraint
         for key in self.waiting_arc_variables.keys():
             w_arc: waiting_arc = get_waiting_arc(self.inputs, key)
-            constraint_value = 0
+            constraint_value = self.waiting_arc_variables['w'.join(w_arc.get_unique_key())]
             for t in self.inputs.trains:
                 if t == w_arc.train:
                     continue
@@ -106,6 +106,10 @@ class math_model:
             for t in self.inputs.trains:
                 if t == tr_arc.train:
                     continue
+                departure_time = t.departure_time
+                departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(departure_time / self.inputs.time_step)
+                if departure_time >= arrival:
+                    continue
                 for time in range(tr_arc.time_stamp, arrival, self.inputs.time_step):
                     tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track)
                     uni_key2: str = "t".join(tr_arc2.get_unique_key())
@@ -116,8 +120,6 @@ class math_model:
                         uni_key2: str = "t".join(tr_arc2.get_unique_key())
                         if uni_key2 in self.travel_arc_variables.keys():
                             self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
-                departure_time = t.departure_time
-                departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(departure_time / self.inputs.time_step)
                 for time in range(departure_time, tr_arc.time_stamp, self.inputs.time_step):
                     if tr_arc.time_stamp - time < arrival - tr_arc.time_stamp:
                         tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track)
