@@ -59,9 +59,6 @@ class math_model:
                     if tr2.departure_location == tr.arrival_location:
                         next_tr = tr2
                         break
-
-
-
                 arrival: int = departure + tr.traveled_time(self.inputs.trains_speed)
                 arrival += 0 if tr.departure_location == t.departure_time or tr.departure_location.is_siding else self.inputs.trains_waiting_time_in_stations
                 c: bool = arrival % self.inputs.time_step > 0
