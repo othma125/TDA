@@ -13,9 +13,8 @@ class math_model:
         self.waiting_arc_variables: dict = {}
         obj = 0
         for t in self.inputs.trains:
-            departure_time = t.departure_time
-            departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(departure_time / self.inputs.time_step)
-            max_time_stamp: int = departure_time + 2 * (t.arrival_time - departure_time)
+            departure_time: int = t.departure_time if t.departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(t.departure_time / self.inputs.time_step)
+            max_time_stamp: int = departure_time + 3 * (t.arrival_time - departure_time)
             for time in range(departure_time, max_time_stamp, self.inputs.time_step):
                 for tr in t.tracks:
                     tr_arc: travel_arc = travel_arc(t, time, tr)
@@ -69,7 +68,7 @@ class math_model:
                     tr_arc: travel_arc = travel_arc(t, time, tr)
                     uni_key: str = 't'.join(tr_arc.get_unique_key())
                     sum1 = self.travel_arc_variables[uni_key]
-                    w_arc: waiting_arc = waiting_arc(t, time_stamp - (self.inputs.time_step if c else 0), tr.arrival_location)
+                    w_arc: waiting_arc = waiting_arc(t, time_stamp, tr.arrival_location)
                     uni_key: str = 'w'.join(w_arc.get_unique_key())
                     sum1 += self.waiting_arc_variables[uni_key] if uni_key in self.waiting_arc_variables else 0
                     sum2 = 0
