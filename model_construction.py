@@ -40,6 +40,8 @@ class math_model:
                         tr_arc: travel_arc = travel_arc(t, time, tr)
                         uni_key: str = 't'.join(tr_arc.get_unique_key())
                         constraint_value2 += self.travel_arc_variables[uni_key]
+                        if time == departure_time:
+                            self.model += self.travel_arc_variables[uni_key] == 1
                     elif tr.arrival_location == t.arrival_location:
                         tr_arc: travel_arc = travel_arc(t, time, tr)
                         uni_key: str = 't'.join(tr_arc.get_unique_key())
@@ -86,13 +88,14 @@ class math_model:
         # waiting sites capacity constraint
         for key in self.waiting_arc_variables.keys():
             w_arc: waiting_arc = get_waiting_arc(self.inputs, key)
-            constraint_value = self.waiting_arc_variables['w'.join(w_arc.get_unique_key())]
+            constraint_value = self.waiting_arc_variables[key]
             for t in self.inputs.trains:
                 if t == w_arc.train:
                     continue
                 w_arc2: waiting_arc = waiting_arc(t, w_arc.time_stamp, w_arc.waiting_station)
                 uni_key: str = 'w'.join(w_arc2.get_unique_key())
-                constraint_value += self.waiting_arc_variables[uni_key] if uni_key in self.waiting_arc_variables.keys() else 0
+                if uni_key in self.waiting_arc_variables.keys():
+                    constraint_value += self.waiting_arc_variables[uni_key]
             self.model += constraint_value <= w_arc.waiting_station.capacity
 
         # conflicts constraint
@@ -111,9 +114,8 @@ class math_model:
                     uni_key2: str = "t".join(tr_arc2.get_unique_key())
                     if uni_key2 in self.travel_arc_variables.keys():
                         self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
-                if tr_arc.traveled_track.is_single_track:
-                    inv_tr: track = tr_arc.traveled_track.get_inverse()
-                    for time in range(tr_arc.time_stamp, arrival, self.inputs.time_step):
+                    if tr_arc.traveled_track.is_single_track:
+                        inv_tr: track = tr_arc.traveled_track.get_inverse()
                         tr_arc2: travel_arc = travel_arc(t, time, inv_tr)
                         uni_key2: str = "t".join(tr_arc2.get_unique_key())
                         if uni_key2 in self.travel_arc_variables.keys():
@@ -127,9 +129,8 @@ class math_model:
                         uni_key2: str = "t".join(tr_arc2.get_unique_key())
                         if uni_key2 in self.travel_arc_variables.keys():
                             self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
-                if tr_arc.traveled_track.is_single_track:
-                    inv_tr: track = tr_arc.traveled_track.get_inverse()
-                    for time in range(departure_time, tr_arc.time_stamp, self.inputs.time_step):
+                    if tr_arc.traveled_track.is_single_track:
+                        inv_tr: track = tr_arc.traveled_track.get_inverse()
                         if tr_arc.time_stamp - time < arrival - tr_arc.time_stamp:
                             tr_arc2: travel_arc = travel_arc(t, time, inv_tr)
                             uni_key2: str = "t".join(tr_arc2.get_unique_key())
