@@ -1,4 +1,4 @@
-import math
+
 from haversine import haversine
 
 
@@ -34,13 +34,13 @@ class track:
 
 
 class train:
-    def __init__(self, i: int, departure: int, arrival: int, category: int, tracks: list[track], path: list[location]):
+    def __init__(self, i: int, departure: int, arrival: int, category: int, tracks: list[track], route: list[location]):
         self.index = i
         self.departure_time: int = departure
         self.arrival_time: int = arrival
         self.category: int = category
         self.tracks: list[track] = tracks
-        self.route: list[location] = path
+        self.route: list[location] = route
         self.departure_location: location = self.route[0]
         self.arrival_location: location = self.route[len(self.route) - 1]
 
