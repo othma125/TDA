@@ -101,10 +101,20 @@ class math_model:
             uni_key: str = "t".join(tr_arc.get_unique_key())
             travel_time: int = tr_arc.traveled_track.traveled_time(self.inputs.trains_speed)
             arrival: int = tr_arc.time_stamp + travel_time
-            arrival = arrival + self.inputs.time_step if arrival % self.inputs.time_step == 0 else self.inputs.time_step * ceil(arrival / self.inputs.time_step)
+            arrival = arrival if arrival % self.inputs.time_step == 0 else self.inputs.time_step * ceil(arrival / self.inputs.time_step)
             for t in self.inputs.trains:
                 if t == tr_arc.train:
                     continue
+                for time in range(tr_arc.time_stamp, arrival, self.inputs.time_step):
+                    tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track)
+                    uni_key2: str = "t".join(tr_arc2.get_unique_key())
+                    if uni_key2 in self.travel_arc_variables.keys():
+                        self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
+                    if tr_arc.traveled_track.is_single_track:
+                        tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track.get_inverse())
+                        uni_key2: str = "t".join(tr_arc2.get_unique_key())
+                        if uni_key2 in self.travel_arc_variables.keys():
+                            self.model += 1 - self.travel_arc_variables[uni_key] >= self.travel_arc_variables[uni_key2]
                 departure_time = t.departure_time
                 departure_time: int = departure_time if departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(departure_time / self.inputs.time_step)
                 for time in range(departure_time, tr_arc.time_stamp, self.inputs.time_step):
