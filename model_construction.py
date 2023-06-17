@@ -14,7 +14,7 @@ class math_model:
         obj = 0
         for t in self.inputs.trains:
             departure_time: int = t.departure_time if t.departure_time % self.inputs.time_step == 0 else self.inputs.time_step * ceil(t.departure_time / self.inputs.time_step)
-            max_time_stamp: int = departure_time + 3 * (t.arrival_time - departure_time)
+            max_time_stamp: int = departure_time + 2 * (t.arrival_time - departure_time)
             for time in range(departure_time, max_time_stamp, self.inputs.time_step):
                 for tr in t.tracks:
                     tr_arc: travel_arc = travel_arc(t, time, tr)
