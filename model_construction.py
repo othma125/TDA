@@ -87,7 +87,7 @@ class math_model:
 
         # waiting sites capacity constraint
         for key in self.__waiting_arc_variables.keys():
-            w_arc: waiting_arc = get_waiting_arc(self.__inputs, key)
+            w_arc: waiting_arc = waiting_arc.get_waiting_arc(self.__inputs, key)
             constraint_value = self.__waiting_arc_variables[key]
             for t in self.__inputs.trains:
                 if t == w_arc.train:
@@ -100,7 +100,7 @@ class math_model:
 
         # conflicts constraint
         for key in self.__travel_arc_variables.keys():
-            tr_arc: travel_arc = get_travel_arc(self.__inputs, key)
+            tr_arc: travel_arc = travel_arc.get_travel_arc(self.__inputs, key)
             uni_key: str = "t".join(tr_arc.get_unique_key())
             travel_time: int = tr_arc.traveled_track.traveled_time(self.__inputs.trains_speed)
             arrival: int = tr_arc.time_stamp + travel_time
@@ -147,14 +147,14 @@ class math_model:
         for key, x in self.__travel_arc_variables.items():
             if p.value(x) != 1:
                 continue
-            tr_arc = get_travel_arc(self.__inputs, key)
+            tr_arc = travel_arc.get_travel_arc(self.__inputs, key)
             if tr_arc.train.arrival_location == tr_arc.traveled_track.arrival_location:
                 time_stamp: int = tr_arc.time_stamp + tr_arc.traveled_track.traveled_time(self.__inputs.trains_speed)
                 delay += (time_stamp - tr_arc.train.arrival_time)
         print(f'Total delay of trains = {delay}')
         for key, x in self.__travel_arc_variables.items():
             if p.value(x) == 1:
-                tr_arc = get_travel_arc(self.__inputs, key)
+                tr_arc = travel_arc.get_travel_arc(self.__inputs, key)
                 time_stamp: int = tr_arc.time_stamp + tr_arc.traveled_track.traveled_time(self.__inputs.trains_speed)
                 if tr_arc.traveled_track.departure_location == tr_arc.train.departure_location:
                     print(f'Train {tr_arc.train} travel from {tr_arc.train.departure_location} to {tr_arc.train.arrival_location}')
@@ -181,6 +181,11 @@ class travel_arc:
                             upBound=1,
                             cat=p.LpBinary)
 
+    @classmethod
+    def get_travel_arc(cls, input_data: data, s: str):
+        l = s.split('t')
+        return cls(input_data.trains[int(l[3])], int(l[0]), track(input_data.locations[int(l[1])], input_data.locations[int(l[2])]))
+
 
 class waiting_arc:
     def __init__(self, trn: train, time: int, loc: location):
@@ -202,16 +207,10 @@ class waiting_arc:
                             lowBound=0,
                             upBound=1,
                             cat=p.LpBinary)
-
-
-def get_travel_arc(input_data: data, s: str) -> travel_arc:
-    l = s.split('t')
-    return travel_arc(input_data.trains[int(l[3])], int(l[0]), track(input_data.locations[int(l[1])], input_data.locations[int(l[2])]))
-
-
-def get_waiting_arc(input_data: data, s: str) -> waiting_arc:
-    l = s.split('w')
-    return waiting_arc(input_data.trains[int(l[2])], int(l[0]), input_data.locations[int(l[1])])
+    @classmethod
+    def get_waiting_arc(cls, input_data: data, s: str):
+        l = s.split('w')
+        return cls(input_data.trains[int(l[2])], int(l[0]), input_data.locations[int(l[1])])
 
 
 def toTimeFormat(time: int) -> str:

@@ -25,16 +25,18 @@ class data:
                 time = line[2].split(':')
                 departure += int(time[0]) * 60
                 departure += int(time[1])
-                path: list[location] = [self.locations[int(line[i]) - 1] for i in range(3, n)]
+                route: list[location] = [self.locations[int(line[i]) - 1] for i in range(3, n)]
+                if len(route) < 2:
+                    raise ValueError('train route must contains at least two stop stations')
                 tracks = []
                 arrival: int = departure
-                n: int = len(path)
+                n: int = len(route)
                 for i in range(n - 1):
-                    tr = track(path[i], path[i + 1])
+                    tr = track(route[i], route[i + 1])
                     arrival += tr.traveled_time(self.trains_speed)
-                    if not path[i].is_siding:
+                    if not route[i].is_siding:
                         arrival += self.trains_waiting_time_in_stations if i > 0 else 0
                     tracks.append(tr)
-                self.trains.append(train(t, departure, arrival, category, tracks, path))
+                self.trains.append(train(t, departure, arrival, category, tracks, route))
 
 
