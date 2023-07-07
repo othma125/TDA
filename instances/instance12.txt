@@ -1,0 +1,11 @@
+6 // stations count
+1 46.10 19.65 5 siding //station id, station location, station capacity
+2 45.25 19.82 5 siding
+3 44.94 20.21 1 siding
+4 44.81 20.46 5 siding
+5 43.58 21.32 5 siding
+6 43.31 21.88 5 siding
+3 60 2 //trains count, train average speed (km/h), waiting time in station (sidings are not included)
+1 1 3:00 6 5 4 3 2 1
+2 1 7:30 2 3 4 5 6
+3 2 7:30 4 3 2
