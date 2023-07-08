@@ -151,7 +151,10 @@ class math_model:
 
     def solve(self):
         self.__model.solve()
-        print(f'Result status = {p.LpStatus[self.__model.status]}')
+        status: str = p.LpStatus[self.__model.status]
+        print(f'Result status = {status}')
+        if status == 'Infeasible':
+            return
         print(f'Objective function value = {p.value(self.__model.objective)}')
         delay: int = 0
         for key, x in self.__travel_arc_variables.items():
@@ -214,12 +217,6 @@ class waiting_arc:
                             lowBound=0,
                             upBound=1,
                             cat=p.LpBinary)
-
-    # def get_binary_variable_for_arrival(self):
-    #     return p.LpVariable("a".join(self.get_unique_key()),
-    #                         lowBound=0,
-    #                         upBound=1,
-    #                         cat=p.LpBinary)
 
     @classmethod
     def get_waiting_arc(cls, input_data: data, s: str):

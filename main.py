@@ -10,13 +10,13 @@ if __name__ == '__main__':
         print("Reading of the data failed. Try again")
         print(e)
         quit()
-    # try:
-    print("\t..Now creating model..")
-    model = math_model(inputs)
-    # except Exception as e:
-    #     print("Something went wrong in creating model. Try again")
-    #     print(e)
-    #     quit()
+    try:
+        print("\t..Now creating model..")
+        model = math_model(inputs)
+    except Exception as e:
+        print("Something went wrong in creating model. Try again")
+        print(e)
+        quit()
     try:
         print("\t..Now solving..")
         model.solve()
