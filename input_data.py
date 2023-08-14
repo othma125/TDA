@@ -61,10 +61,11 @@ class data:
                         if len(route) > 0:
                             tr: track = track(route[-1], self.locations[station_name])
                             h, m = row[4].split(':')
-                            tr.travel_time = int(h) * 60 + int(m) - departure_time
+                            tr.__setattr__('travel_time', int(h) * 60 + int(m) - departure_time)
                             tracks.append(tr)
                         route.append(self.locations[station_name])
                 self.trains_count: int = len(self.trains)
+                self.locations: list = [loc for loc in self.locations.values()]
                 self.stations_count: int = len(self.locations)
                 print(f"{self.trains_count = }")
                 print(f"{self.stations_count = }")

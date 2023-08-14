@@ -21,7 +21,7 @@ class track:
         return track(self.arrival_location, self.departure_location)
 
     def traveled_time(self, train_speed: int) -> int:
-        if self.travel_time:
+        if hasattr(self, 'travel_time'):
             return self.travel_time
         else:
             from haversine import haversine
