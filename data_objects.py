@@ -10,6 +10,9 @@ class location:
     def __str__(self):
         return f'Location with index = {self.index + 1}'
 
+    def __eq__(self, other):
+        return self.index == other.index
+
 
 class track:
     def __init__(self, departure: location, arrival: location):
@@ -19,6 +22,16 @@ class track:
 
     def get_inverse(self):
         return track(self.arrival_location, self.departure_location)
+
+    def traveled_by(self, trn) -> int:
+        for tr_id, tr in enumerate(trn.tracks):
+            if tr == self:
+                return tr_id
+        return -1
+
+    def __eq__(self, other):
+        return self.arrival_location == other.arrival_location \
+            and self.departure_location == other.departure_location
 
     def traveled_time(self, train_speed: int) -> int:
         if hasattr(self, 'travel_time'):

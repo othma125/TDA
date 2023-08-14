@@ -125,7 +125,7 @@ class math_model:
                             uni_key2]
                     if tr_arc.traveled_track.is_single_track:
                         inv_tr: track = tr_arc.traveled_track.get_inverse()
-                        tr_arc2: travel_arc = travel_arc(t, time, inv_tr)
+                        tr_arc2: travel_arc = travel_arc(t, time, inv_tr.traveled_by(t))
                         uni_key2: str = tr_arc2.get_unique_key()
                         if uni_key2 in self.__travel_arc_variables.keys():
                             self.__model += 1 - self.__travel_arc_variables[uni_key] >= self.__travel_arc_variables[uni_key2]
@@ -135,7 +135,7 @@ class math_model:
                     continue
                 for time in range(departure_time, tr_arc.time_stamp, self.__inputs.time_step):
                     if tr_arc.time_stamp - time < arrival - tr_arc.time_stamp:
-                        tr_arc2: travel_arc = travel_arc(t, time, tr_arc.traveled_track)
+                        tr_arc2: travel_arc = travel_arc(t, time, tr_arc.track_id)
                         uni_key2: str = tr_arc2.get_unique_key()
                         if uni_key2 in self.__travel_arc_variables.keys():
                             self.__model += 1 - self.__travel_arc_variables[uni_key] >= self.__travel_arc_variables[
@@ -143,7 +143,7 @@ class math_model:
                     if tr_arc.traveled_track.is_single_track:
                         inv_tr: track = tr_arc.traveled_track.get_inverse()
                         if tr_arc.time_stamp - time < arrival - tr_arc.time_stamp:
-                            tr_arc2: travel_arc = travel_arc(t, time, inv_tr)
+                            tr_arc2: travel_arc = travel_arc(t, time, inv_tr.traveled_by(t))
                             uni_key2: str = tr_arc2.get_unique_key()
                             if uni_key2 in self.__travel_arc_variables.keys():
                                 self.__model += 1 - self.__travel_arc_variables[uni_key] >= self.__travel_arc_variables[
