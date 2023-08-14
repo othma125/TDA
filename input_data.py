@@ -39,45 +39,39 @@ class data:
                                 capacity = 1 if station_type == 'staj' or station_type == 'ukr' else 3
                             except IndexError:
                                 capacity = 3
-                            index = len(self.locations)
-                            loc: location = location([str(index), '0', '0', str(capacity), 'siding'])
+                            loc: location = location([str(len(self.locations) + 1), '0', '0', str(capacity), 'siding'])
                             loc.name = station_name
                             self.locations[station_name] = loc
                         if len(route) > 0:
                             tr: track = track(route[-1], self.locations[station_name])
-                            try:
-                                h, m = row[4].split(':')
-                            except ValueError:
-                                break
-                            tr.__setattr__('travel_time', int(h) * 60 + int(m) - departure_time)
+                            h, m = row[4].split(':')
+                            setattr(tr, 'travel_time', int(h) * 60 + int(m) - departure_time)
                             tracks.append(tr)
                         route.append(self.locations[station_name])
                         if row[5] != 'Destination':
-                            try:
-                                h, m = row[5].split(':')
-                                departure_time: int = int(h) * 60 + int(m)
-                            except ValueError:
-                                break
+                            h, m = row[5].split(':')
+                            departure_time: int = int(h) * 60 + int(m)
                             if row[4] == 'Source':
                                 train_departure_time = departure_time
                         else:
                             h, m = row[4].split(':')
                             train_arrival_time: int = int(h) * 60 + int(m)
-                            # print(train_departure_time)
-                            # print(train_arrival_time)
+                            # print(f'{train_departure_time = }')
+                            # print(f'{train_arrival_time = }')
                             # for tr in tracks:
                             #     print(tr)
-                            #     print(tr.travel_time)
                             # for r in route:
                             #     print(r)
-                            # quit()
-                            trn: train = train(len(self.trains), train_departure_time, train_arrival_time, category, tracks.copy(), route.copy())
+                            trn: train = train(len(self.trains), train_departure_time, train_arrival_time, category, tracks, route)
                             self.trains.append(trn)
+                            new_locations = False
                 self.trains_count: int = len(self.trains)
-                self.locations: list = [loc for loc in self.locations.values()]
                 self.stations_count: int = len(self.locations)
+                # print(self.locations.keys())
+                self.locations: list = [loc for loc in self.locations.values()]
                 print(f"{self.trains_count = }")
                 print(f"{self.stations_count = }")
+                # quit()
             else:
                 line = file.readline().split()
                 self.stations_count: int = int(line[0])
