@@ -33,21 +33,6 @@ class data:
                         continue
                     elif new_locations:
                         station_name = row[2]
-                        if row[5] != 'Destination':
-                            try:
-                                h, m = row[5].split(':')
-                                departure_time: int = int(h) * 60 + int(m)
-                            except ValueError:
-                                break
-                        else:
-                            h, m = row[4].split(':')
-                            train_arrival_time: int = int(h) * 60 + int(m)
-                            trn: train = train(len(self.trains), train_departure_time, train_arrival_time, category, tracks, route)
-                            trn.index = len(self.trains)
-                            self.trains.append(trn)
-                            continue
-                        if row[4] == 'Source':
-                            train_departure_time = departure_time
                         if all(key != station_name for key in self.locations.keys()):
                             try:
                                 station_type = station_name.split()[-1]
@@ -60,10 +45,34 @@ class data:
                             self.locations[station_name] = loc
                         if len(route) > 0:
                             tr: track = track(route[-1], self.locations[station_name])
-                            h, m = row[4].split(':')
+                            try:
+                                h, m = row[4].split(':')
+                            except ValueError:
+                                break
                             tr.__setattr__('travel_time', int(h) * 60 + int(m) - departure_time)
                             tracks.append(tr)
                         route.append(self.locations[station_name])
+                        if row[5] != 'Destination':
+                            try:
+                                h, m = row[5].split(':')
+                                departure_time: int = int(h) * 60 + int(m)
+                            except ValueError:
+                                break
+                            if row[4] == 'Source':
+                                train_departure_time = departure_time
+                        else:
+                            h, m = row[4].split(':')
+                            train_arrival_time: int = int(h) * 60 + int(m)
+                            # print(train_departure_time)
+                            # print(train_arrival_time)
+                            # for tr in tracks:
+                            #     print(tr)
+                            #     print(tr.travel_time)
+                            # for r in route:
+                            #     print(r)
+                            # quit()
+                            trn: train = train(len(self.trains), train_departure_time, train_arrival_time, category, tracks.copy(), route.copy())
+                            self.trains.append(trn)
                 self.trains_count: int = len(self.trains)
                 self.locations: list = [loc for loc in self.locations.values()]
                 self.stations_count: int = len(self.locations)
