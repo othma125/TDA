@@ -1,14 +1,11 @@
-
-from haversine import haversine
-
-
 class location:
     def __init__(self, line: list[str]):
-        self.index: int = int(line[0]) - 1
-        self.X: float = float(line[1])
-        self.Y: float = float(line[2])
-        self.capacity: int = int(line[3])
-        self.is_siding: bool = line[4] == 'siding'
+        if line:
+            self.index: int = int(line[0]) - 1
+            self.X: float = float(line[1])
+            self.Y: float = float(line[2])
+            self.capacity: int = int(line[3])
+            self.is_siding: bool = line[4] == 'siding'
 
     def __str__(self):
         return f'Location with index = {self.index + 1}'
@@ -24,10 +21,14 @@ class track:
         return track(self.arrival_location, self.departure_location)
 
     def traveled_time(self, train_speed: int) -> int:
-        departure = (self.departure_location.X, self.departure_location.Y)
-        arrival = (self.arrival_location.X, self.arrival_location.Y)
-        distance: float = haversine(departure, arrival)
-        return int((distance / train_speed) * 60)
+        if self.travel_time:
+            return self.travel_time
+        else:
+            from haversine import haversine
+            departure = (self.departure_location.X, self.departure_location.Y)
+            arrival = (self.arrival_location.X, self.arrival_location.Y)
+            distance: float = haversine(departure, arrival)
+            return int((distance / train_speed) * 60)
 
     def __str__(self):
         return f'Track(departure = {self.departure_location}, arrival = {self.arrival_location})'
