@@ -74,6 +74,8 @@ class data:
                 self.locations = [location(file.readline().split()) for _ in range(self.stations_count)]
                 line = file.readline().split()
                 self.trains_count: int = int(line[0])
+                print(f"{self.trains_count = }")
+                print(f"{self.stations_count = }")
                 self.trains_speed: int = int(line[1])
                 self.trains_waiting_time_in_stations: int = int(line[2])
                 for t in range(self.trains_count):
