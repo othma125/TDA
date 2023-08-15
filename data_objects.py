@@ -8,6 +8,8 @@ class location:
             self.is_siding: bool = line[4] == 'siding'
 
     def __str__(self):
+        if hasattr(self, 'name'):
+            return f'name = "{self.name}"'
         return f'Location with index = {self.index + 1}'
 
     def __eq__(self, other):
@@ -36,12 +38,11 @@ class track:
     def traveled_time(self, train_speed: int) -> int:
         if hasattr(self, 'travel_time'):
             return self.travel_time
-        else:
-            from haversine import haversine
-            departure = (self.departure_location.X, self.departure_location.Y)
-            arrival = (self.arrival_location.X, self.arrival_location.Y)
-            distance: float = haversine(departure, arrival)
-            return int((distance / train_speed) * 60)
+        from haversine import haversine
+        departure = (self.departure_location.X, self.departure_location.Y)
+        arrival = (self.arrival_location.X, self.arrival_location.Y)
+        distance: float = haversine(departure, arrival)
+        return int((distance / train_speed) * 60)
 
     def __str__(self):
         return f'Track(departure = {self.departure_location}, arrival = {self.arrival_location})'

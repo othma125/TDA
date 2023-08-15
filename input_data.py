@@ -40,7 +40,7 @@ class data:
                             except IndexError:
                                 capacity = 3
                             loc: location = location([str(len(self.locations) + 1), '0', '0', str(capacity), 'siding'])
-                            loc.name = station_name
+                            setattr(loc, 'name', station_name)
                             self.locations[station_name] = loc
                         if len(route) > 0:
                             tr: track = track(route[-1], self.locations[station_name])

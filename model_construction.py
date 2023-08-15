@@ -165,8 +165,8 @@ class math_model:
                 time_stamp: int = tr_arc.time_stamp + tr_arc.traveled_track.traveled_time(self.__inputs.trains_speed)
                 if tr_arc.traveled_track.departure_location == tr_arc.train.departure_location:
                     print(f'Train {tr_arc.train} travel from {tr_arc.train.departure_location} to {tr_arc.train.arrival_location}')
-                print(f'departure from {tr_arc.traveled_track.departure_location.index + 1} at {toTimeFormat(tr_arc.time_stamp)},', end='')
-                print(f' arrival to {tr_arc.traveled_track.arrival_location.index + 1} at {toTimeFormat(time_stamp)}')
+                print(f'departure from {tr_arc.traveled_track.departure_location} at {toTimeFormat(tr_arc.time_stamp)},', end='')
+                print(f' arrival to {tr_arc.traveled_track.arrival_location} at {toTimeFormat(time_stamp)}')
                 if tr_arc.traveled_track.arrival_location == tr_arc.train.arrival_location:
                     print(
                         f'Scheduled arrival time for train {tr_arc.train.index + 1} is {toTimeFormat(tr_arc.train.arrival_time)}')
