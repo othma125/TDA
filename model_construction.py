@@ -66,7 +66,7 @@ class math_model:
                         next_tr = tr_id2
                         break
                 arrival: int = departure + tr.traveled_time(self.__inputs.trains_speed)
-                arrival += 0 if tr.arrival_location.is_siding or t.arrival_location == tr.arrival_location else self.__inputs.trains_waiting_time_in_stations
+                arrival += 0 if t.arrival_location == tr.arrival_location else self.__inputs.trains_waiting_time_in_stations
                 arrival = self.__inputs.time_step * ceil(
                     arrival / self.__inputs.time_step) if arrival % self.__inputs.time_step > 0 else arrival
                 arrival_time_stamp: int = arrival
@@ -111,7 +111,7 @@ class math_model:
             uni_key: str = tr_arc.get_unique_key()
             travel_time: int = tr_arc.traveled_track.traveled_time(self.__inputs.trains_speed)
             arrival: int = tr_arc.time_stamp + travel_time
-            arrival += 0 if tr_arc.traveled_track.arrival_location == tr_arc.train.arrival_location or tr_arc.traveled_track.arrival_location.is_siding else self.__inputs.trains_waiting_time_in_stations
+            arrival += 0 if tr_arc.traveled_track.arrival_location == tr_arc.train.arrival_location else self.__inputs.trains_waiting_time_in_stations
             arrival = arrival if arrival % self.__inputs.time_step == 0 else self.__inputs.time_step * ceil(
                 arrival / self.__inputs.time_step)
             for t in self.__inputs.trains:
@@ -146,8 +146,7 @@ class math_model:
                             tr_arc2: travel_arc = travel_arc(t, time, inv_tr.traveled_by(t))
                             uni_key2: str = tr_arc2.get_unique_key()
                             if uni_key2 in self.__travel_arc_variables.keys():
-                                self.__model += 1 - self.__travel_arc_variables[uni_key] >= self.__travel_arc_variables[
-                                    uni_key2]
+                                self.__model += 1 - self.__travel_arc_variables[uni_key] >= self.__travel_arc_variables[uni_key2]
 
         self.__model += obj
 
@@ -168,8 +167,7 @@ class math_model:
                 print(f'departure from {tr_arc.traveled_track.departure_location} at {toTimeFormat(tr_arc.time_stamp)},', end='')
                 print(f' arrival to {tr_arc.traveled_track.arrival_location} at {toTimeFormat(time_stamp)}')
                 if tr_arc.traveled_track.arrival_location == tr_arc.train.arrival_location:
-                    print(
-                        f'Scheduled arrival time for train {tr_arc.train.index + 1} is {toTimeFormat(tr_arc.train.arrival_time)}')
+                    print(f'Scheduled arrival time for train {tr_arc.train.index + 1} is {toTimeFormat(tr_arc.train.arrival_time)}')
 
 
 class travel_arc:
