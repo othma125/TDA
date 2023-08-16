@@ -5,7 +5,7 @@ if __name__ == '__main__':
     print("Now starting..")
     print("\t..Now reading data..")
     try:
-        inputs = data("new_instance.csv")
+        inputs = data("new_instance3.csv")
     except Exception as e:
         print("Reading of the data failed. Try again")
         print(e)

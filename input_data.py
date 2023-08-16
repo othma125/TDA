@@ -35,11 +35,10 @@ class data:
                         station_name = row[2]
                         if all(key != station_name for key in self.locations.keys()):
                             try:
-                                station_type = station_name.split()[-1]
-                                capacity = 1 if station_type == 'staj' or station_type == 'ukr' else 3
+                                capacity = int(row[10])
                             except IndexError:
                                 capacity = 3
-                            loc: location = location([str(len(self.locations) + 1), '0', '0', str(capacity), 'siding'])
+                            loc: location = location([str(len(self.locations) + 1), '0', '0', str(capacity), 'station' if row[9] == 'station' else 'siding'])
                             setattr(loc, 'name', station_name)
                             self.locations[station_name] = loc
                         if len(route) > 0:
