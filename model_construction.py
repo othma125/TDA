@@ -39,12 +39,17 @@ class math_model:
                         self.__delay += self.__travel_arc_variables[tr_arc.get_unique_key()] * (
                                     time_stamp - t.arrival_time)
 
-            constraint_value2 = constraint_value3 = 0
+            constraint_value2 = 0
+            constraint_value3 = 0
             for time in range(departure_time, max_time_stamp, self.__inputs.time_step):
                 for tr_id, tr in enumerate(t.tracks):
                     if tr.departure_location == t.departure_location:
                         tr_arc: travel_arc = travel_arc(t, time, tr_id)
                         uni_key: str = tr_arc.get_unique_key()
+                        if time < t.departure_time:
+                            self.__model += self.__travel_arc_variables[uni_key] == 0
+                        if time > t.departure_time + self.__inputs.time_step:
+                            self.__model += self.__travel_arc_variables[uni_key] == 0
                         constraint_value2 += self.__travel_arc_variables[uni_key]
                     if tr.arrival_location == t.arrival_location:
                         tr_arc: travel_arc = travel_arc(t, time, tr_id)
@@ -66,7 +71,7 @@ class math_model:
                         next_tr = tr_id2
                         break
                 arrival: int = departure + tr.traveled_time(self.__inputs.trains_speed)
-                arrival += 0 if t.arrival_location == tr.arrival_location else self.__inputs.trains_waiting_time_in_stations
+                arrival += 0 if t.arrival_location == tr.arrival_location or t.category == 1 else self.__inputs.trains_waiting_time_in_stations
                 arrival = self.__inputs.time_step * ceil(
                     arrival / self.__inputs.time_step) if arrival % self.__inputs.time_step > 0 else arrival
                 arrival_time_stamp: int = arrival
@@ -111,7 +116,7 @@ class math_model:
             uni_key: str = tr_arc.get_unique_key()
             travel_time: int = tr_arc.traveled_track.traveled_time(self.__inputs.trains_speed)
             arrival: int = tr_arc.time_stamp + travel_time
-            arrival += 0 if tr_arc.traveled_track.arrival_location == tr_arc.train.arrival_location else self.__inputs.trains_waiting_time_in_stations
+            arrival += 0 if tr_arc.traveled_track.arrival_location == tr_arc.train.arrival_location or tr_arc.train.category == 1 else self.__inputs.trains_waiting_time_in_stations
             arrival = arrival if arrival % self.__inputs.time_step == 0 else self.__inputs.time_step * ceil(
                 arrival / self.__inputs.time_step)
             for t in self.__inputs.trains:

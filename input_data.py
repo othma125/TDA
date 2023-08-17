@@ -34,10 +34,7 @@ class data:
                     elif new_locations:
                         station_name = row[2]
                         if all(key != station_name for key in self.locations.keys()):
-                            try:
-                                capacity = int(row[10])
-                            except IndexError:
-                                capacity = 3
+                            capacity = int(row[10])
                             loc: location = location([str(len(self.locations) + 1), '0', '0', str(capacity), 'station' if row[9] == 'station' else 'siding'])
                             setattr(loc, 'name', station_name)
                             self.locations[station_name] = loc
@@ -68,8 +65,8 @@ class data:
                 self.stations_count: int = len(self.locations)
                 # print(self.locations.keys())
                 self.locations: list = [loc for loc in self.locations.values()]
-                print(f"{self.trains_count = }")
-                print(f"{self.stations_count = }")
+                # print(f"{self.trains_count = }")
+                # print(f"{self.stations_count = }")
                 # quit()
             else:
                 line = file.readline().split()
