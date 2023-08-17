@@ -46,10 +46,10 @@ class math_model:
                     if tr.departure_location == t.departure_location:
                         tr_arc: travel_arc = travel_arc(t, time, tr_id)
                         uni_key: str = tr_arc.get_unique_key()
-                        if time < t.departure_time:
-                            self.__model += self.__travel_arc_variables[uni_key] == 0
-                        if time > t.departure_time + self.__inputs.time_step:
-                            self.__model += self.__travel_arc_variables[uni_key] == 0
+                        # if time < t.departure_time:
+                        #     self.__model += self.__travel_arc_variables[uni_key] == 0
+                        # if time > t.departure_time + self.__inputs.time_step:
+                        #     self.__model += self.__travel_arc_variables[uni_key] == 0
                         constraint_value2 += self.__travel_arc_variables[uni_key]
                     if tr.arrival_location == t.arrival_location:
                         tr_arc: travel_arc = travel_arc(t, time, tr_id)

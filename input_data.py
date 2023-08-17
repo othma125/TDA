@@ -18,7 +18,6 @@ class data:
                     row = line.split(',')
                     if row[0] == '' and row[1] == '':
                         continue
-                    # print(row)
                     if row[1] == 'Train Name':
                         new_train = True
                         new_locations = False
@@ -52,22 +51,12 @@ class data:
                         else:
                             h, m = row[4].split(':')
                             train_arrival_time: int = int(h) * 60 + int(m)
-                            # print(f'{train_departure_time = }')
-                            # print(f'{train_arrival_time = }')
-                            # for tr in tracks:
-                            #     print(tr)
-                            # for r in route:
-                            #     print(r)
                             trn: train = train(len(self.trains), train_departure_time, train_arrival_time, category, tracks, route)
                             self.trains.append(trn)
                             new_locations = False
                 self.trains_count: int = len(self.trains)
                 self.stations_count: int = len(self.locations)
-                # print(self.locations.keys())
                 self.locations: list = [loc for loc in self.locations.values()]
-                # print(f"{self.trains_count = }")
-                # print(f"{self.stations_count = }")
-                # quit()
             else:
                 line = file.readline().split()
                 self.stations_count: int = int(line[0])
